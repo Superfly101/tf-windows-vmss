@@ -10,7 +10,7 @@ This Terraform module creates a Windows Virtual Machine Scale Set in Azure.
 ## Usage
 
 1. Clone this repository
-2. Create a `terraform.tfvars` file with your credentials (this file should not be committed to git)
+2. Create a `terraform.tfvars` file with your credentials
 3. Initialize and apply the Terraform configuration
 
 ### Example terraform.tfvars
