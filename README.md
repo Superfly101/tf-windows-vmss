@@ -24,7 +24,6 @@ admin_password = "YourSecurePassword123!"
 
 | Name | Description | Type | Default |
 |------|-------------|------|---------|
-
 | resource_group_name | Name of the resource group | string | "vmss-resources" |
 | location | The Azure Region in which to create resources | string | "eastus2" |
 | vm_sku | SKU for the VMs in the scale set | string | "Standard_D2_v4" |
