@@ -14,35 +14,35 @@ provider "azurerm" {
   features {}
 }
 
-resource "azurerm_resource_group" "vmss" {
+resource "azurerm_resource_group" "rg" {
   name     = var.resource_group_name
   location = var.location
 }
 
-resource "azurerm_virtual_network" "vmss" {
+resource "azurerm_virtual_network" "vnet" {
   name                = "vmss-network"
-  resource_group_name = azurerm_resource_group.vmss.name
-  location            = azurerm_resource_group.vmss.location
+  resource_group_name = azurerm_resource_group.rg.name
+  location            = azurerm_resource_group.rg.location
   address_space       = ["10.0.0.0/16"]
 }
 
 resource "azurerm_subnet" "internal" {
   name                 = "internal"
-  resource_group_name  = azurerm_resource_group.vmss.name
-  virtual_network_name = azurerm_virtual_network.vmss.name
+  resource_group_name  = azurerm_resource_group.rg.name
+  virtual_network_name = azurerm_virtual_network.vnet.name
   address_prefixes     = ["10.0.2.0/24"]
 }
 
 resource "azurerm_windows_virtual_machine_scale_set" "vmss" {
-  name                     = "vmss-vmss"
-  resource_group_name      = azurerm_resource_group.vmss.name
-  location                 = azurerm_resource_group.vmss.location
+  name                     = "windows-vmss"
+  resource_group_name      = azurerm_resource_group.rg.name
+  location                 = azurerm_resource_group.rg.location
   sku                      = "Standard_D2_v4"
   instances                = 1
   admin_password           = var.admin_password
   admin_username           = var.admin_username
   overprovision            = false
-  computer_name_prefix     = "vm-"
+  computer_name_prefix     = "vm"
   enable_automatic_updates = false
 
   source_image_reference {
@@ -58,7 +58,7 @@ resource "azurerm_windows_virtual_machine_scale_set" "vmss" {
   }
 
   network_interface {
-    name    = "vmss"
+    name    = "${azurerm_virtual_network.vnet.name}-nic"
     primary = true
 
     ip_configuration {
