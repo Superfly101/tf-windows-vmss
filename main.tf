@@ -15,8 +15,8 @@ provider "azurerm" {
 }
 
 resource "azurerm_resource_group" "vmss" {
-  name     = "vmss-resources"
-  location = "eastus2"
+  name     = var.resource_group_name
+  location = var.location
 }
 
 resource "azurerm_virtual_network" "vmss" {
@@ -39,8 +39,9 @@ resource "azurerm_windows_virtual_machine_scale_set" "vmss" {
   location             = azurerm_resource_group.vmss.location
   sku                  = "Standard_D2_v4"
   instances            = 1
-  admin_password       = "P@55w0rd1234!"
-  admin_username       = "adminuser"
+  admin_password       = var.admin_password
+  admin_username       = var.admin_username
+  overprovision        = false
   computer_name_prefix = "vm-"
 
   source_image_reference {
