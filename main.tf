@@ -34,20 +34,21 @@ resource "azurerm_subnet" "internal" {
 }
 
 resource "azurerm_windows_virtual_machine_scale_set" "vmss" {
-  name                 = "vmss-vmss"
-  resource_group_name  = azurerm_resource_group.vmss.name
-  location             = azurerm_resource_group.vmss.location
-  sku                  = "Standard_D2_v4"
-  instances            = 1
-  admin_password       = var.admin_password
-  admin_username       = var.admin_username
-  overprovision        = false
-  computer_name_prefix = "vm-"
+  name                     = "vmss-vmss"
+  resource_group_name      = azurerm_resource_group.vmss.name
+  location                 = azurerm_resource_group.vmss.location
+  sku                      = "Standard_D2_v4"
+  instances                = 1
+  admin_password           = var.admin_password
+  admin_username           = var.admin_username
+  overprovision            = false
+  computer_name_prefix     = "vm-"
+  enable_automatic_updates = false
 
   source_image_reference {
     publisher = "MicrosoftWindowsDesktop"
     offer     = "Windows-10"
-    sku       = "22H2-pro"
+    sku       = "win10-22h2-pro"
     version   = "latest"
   }
 
