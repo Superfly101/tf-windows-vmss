@@ -46,9 +46,9 @@ resource "azurerm_windows_virtual_machine_scale_set" "vmss" {
   enable_automatic_updates = false
 
   source_image_reference {
-    publisher = "MicrosoftWindowsDesktop"
-    offer     = "Windows-10"
-    sku       = "win10-22h2-pro"
+    publisher = "MicrosoftWindowsServer"
+    offer     = "WindowsServer"
+    sku       = "2022-datacenter"
     version   = "latest"
   }
 

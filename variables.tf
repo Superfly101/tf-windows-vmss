@@ -7,7 +7,7 @@ variable "resource_group_name" {
 variable "location" {
   description = "The Azure Region in which to create resources"
   type        = string
-  default     = "eastus2"
+  default     = "centralus"
 }
 
 variable "vm_sku" {
