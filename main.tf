@@ -19,6 +19,11 @@ resource "azurerm_resource_group" "rg" {
   location = var.location
 }
 
+data "azurerm_image" "custom" {
+  name                = var.custom_image_name
+  resource_group_name = var.custom_image_resource_group_name
+}
+
 resource "azurerm_virtual_network" "vnet" {
   name                = "vmss-network"
   resource_group_name = azurerm_resource_group.rg.name
@@ -33,6 +38,38 @@ resource "azurerm_subnet" "internal" {
   address_prefixes     = ["10.0.2.0/24"]
 }
 
+# Optional: Add NSG rule to allow RDP access for verification
+resource "azurerm_network_security_group" "vmss_nsg" {
+  name                = "vmss-nsg"
+  location            = azurerm_resource_group.rg.location
+  resource_group_name = azurerm_resource_group.rg.name
+
+  security_rule {
+    name                       = "allow-rdp"
+    priority                   = 100
+    direction                  = "Inbound"
+    access                     = "Allow"
+    protocol                   = "Tcp"
+    source_port_range          = "*"
+    destination_port_range     = "3389"
+    source_address_prefix      = "*" # For production, restrict this to your IP
+    destination_address_prefix = "*"
+  }
+}
+
+resource "azurerm_subnet_network_security_group_association" "nsg_association" {
+  subnet_id                 = azurerm_subnet.internal.id
+  network_security_group_id = azurerm_network_security_group.vmss_nsg.id
+}
+
+# Optional: Add public IP for RDP access
+resource "azurerm_public_ip_prefix" "vmss" {
+  name                = "vmss-ip-prefix"
+  location            = azurerm_resource_group.rg.location
+  resource_group_name = azurerm_resource_group.rg.name
+  prefix_length       = 28
+}
+
 resource "azurerm_windows_virtual_machine_scale_set" "vmss" {
   name                     = "windows-vmss"
   resource_group_name      = azurerm_resource_group.rg.name
@@ -45,11 +82,16 @@ resource "azurerm_windows_virtual_machine_scale_set" "vmss" {
   computer_name_prefix     = "vm"
   enable_automatic_updates = false
 
-  source_image_reference {
-    publisher = "MicrosoftWindowsServer"
-    offer     = "WindowsServer"
-    sku       = "2022-datacenter"
-    version   = "latest"
+  source_image_id = data.azurerm_image.custom.id
+
+  dynamic "source_image_reference" {
+    for_each = data.azurerm_image.custom.id == null ? [var.source_image] : []
+    content {
+      publisher = var.source_image.publisher
+      offer     = var.source_image.offer
+      sku       = var.source_image.sku
+      version   = var.source_image.version
+    }
   }
 
   os_disk {
@@ -65,6 +107,12 @@ resource "azurerm_windows_virtual_machine_scale_set" "vmss" {
       name      = "internal"
       primary   = true
       subnet_id = azurerm_subnet.internal.id
+
+      public_ip_address {
+        name                    = "vmss-public-ip"
+        public_ip_prefix_id     = azurerm_public_ip_prefix.vmss.id
+        idle_timeout_in_minutes = 15
+      }
     }
   }
 }
