@@ -37,7 +37,7 @@ variable "admin_password" {
 variable "custom_image_name" {
   description = "Name of the custom image to use for the virtual machine scale set"
   type        = string
-  default     = "win2022-devops-agent-1.0.0"
+  default     = null
 }
 
 variable "source_image" {
@@ -59,6 +59,7 @@ variable "source_image" {
 variable "script_blob_url" {
   description = "URL of the PowerShell script in Azure Blob Storage"
   type        = string
+  sensitive   = true
 }
 
 variable "storage_account_name" {
