@@ -14,28 +14,16 @@ provider "azurerm" {
   features {}
 }
 
-resource "azurerm_resource_group" "rg" {
-  name     = var.resource_group_name
-  location = var.location
-}
-
-data "azurerm_image" "custom" {
-  name                = var.custom_image_name
-  resource_group_name = var.custom_image_resource_group_name
-}
-
-# No storage resources - these are created manually in Azure Portal
-
 resource "azurerm_virtual_network" "vnet" {
   name                = "vmss-network"
-  resource_group_name = azurerm_resource_group.rg.name
-  location            = azurerm_resource_group.rg.location
+  resource_group_name = data.azurerm_resource_group.rg.name
+  location            = data.azurerm_resource_group.rg.location
   address_space       = ["10.0.0.0/16"]
 }
 
 resource "azurerm_subnet" "internal" {
   name                 = "internal"
-  resource_group_name  = azurerm_resource_group.rg.name
+  resource_group_name  = data.azurerm_resource_group.rg.name
   virtual_network_name = azurerm_virtual_network.vnet.name
   address_prefixes     = ["10.0.2.0/24"]
 }
@@ -43,8 +31,8 @@ resource "azurerm_subnet" "internal" {
 # Optional: Add NSG rule to allow RDP access for verification
 resource "azurerm_network_security_group" "vmss_nsg" {
   name                = "vmss-nsg"
-  location            = azurerm_resource_group.rg.location
-  resource_group_name = azurerm_resource_group.rg.name
+  location            = data.azurerm_resource_group.rg.location
+  resource_group_name = data.azurerm_resource_group.rg.name
 
   security_rule {
     name                       = "allow-rdp"
@@ -67,15 +55,15 @@ resource "azurerm_subnet_network_security_group_association" "nsg_association" {
 # Optional: Add public IP for RDP access
 resource "azurerm_public_ip_prefix" "vmss" {
   name                = "vmss-ip-prefix"
-  location            = azurerm_resource_group.rg.location
-  resource_group_name = azurerm_resource_group.rg.name
+  location            = data.azurerm_resource_group.rg.location
+  resource_group_name = data.azurerm_resource_group.rg.name
   prefix_length       = 28
 }
 
 resource "azurerm_windows_virtual_machine_scale_set" "vmss" {
   name                     = "windows-vmss"
-  resource_group_name      = azurerm_resource_group.rg.name
-  location                 = azurerm_resource_group.rg.location
+  resource_group_name      = data.azurerm_resource_group.rg.name
+  location                 = data.azurerm_resource_group.rg.location
   sku                      = var.vm_sku
   instances                = 1
   admin_password           = var.admin_password
@@ -136,9 +124,4 @@ resource "azurerm_windows_virtual_machine_scale_set" "vmss" {
       commandToExecute   = "powershell -ExecutionPolicy Unrestricted -File ${var.script_file_name} -TaskName 'DemoScheduledTask' -TaskDescription 'Demo task created via Terraform VMSS'"
     })
   }
-}
-
-# Outputs for verification
-output "vmss_id" {
-  value = azurerm_windows_virtual_machine_scale_set.vmss.id
 }
