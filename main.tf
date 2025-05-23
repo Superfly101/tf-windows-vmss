@@ -24,6 +24,8 @@ data "azurerm_image" "custom" {
   resource_group_name = var.custom_image_resource_group_name
 }
 
+# No storage resources - these are created manually in Azure Portal
+
 resource "azurerm_virtual_network" "vnet" {
   name                = "vmss-network"
   resource_group_name = azurerm_resource_group.rg.name
@@ -115,4 +117,28 @@ resource "azurerm_windows_virtual_machine_scale_set" "vmss" {
       }
     }
   }
+
+  # Custom script extension to download and execute the PowerShell script
+  extension {
+    name                       = "CustomScriptExtension"
+    publisher                  = "Microsoft.Compute"
+    type                       = "CustomScriptExtension"
+    type_handler_version       = "1.10"
+    auto_upgrade_minor_version = true
+
+    settings = jsonencode({
+      fileUris = [var.script_blob_url]
+    })
+
+    protected_settings = jsonencode({
+      storageAccountName = var.storage_account_name
+      storageAccountKey  = var.storage_account_key
+      commandToExecute   = "powershell -ExecutionPolicy Unrestricted -File ${var.script_file_name} -TaskName 'DemoScheduledTask' -TaskDescription 'Demo task created via Terraform VMSS'"
+    })
+  }
+}
+
+# Outputs for verification
+output "vmss_id" {
+  value = azurerm_windows_virtual_machine_scale_set.vmss.id
 }

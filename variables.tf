@@ -13,7 +13,7 @@ variable "resource_group_name" {
 variable "location" {
   description = "The Azure Region in which to create resources"
   type        = string
-  default     = "centralus"
+  default     = "East US 2"
 }
 
 variable "vm_sku" {
@@ -54,4 +54,26 @@ variable "source_image" {
     sku       = "2022-datacenter"
     version   = "latest"
   }
+}
+
+variable "script_blob_url" {
+  description = "URL of the PowerShell script in Azure Blob Storage"
+  type        = string
+}
+
+variable "storage_account_name" {
+  description = "Name of the storage account containing the PowerShell script"
+  type        = string
+}
+
+variable "storage_account_key" {
+  description = "Access key for the storage account"
+  type        = string
+  sensitive   = true
+}
+
+variable "script_file_name" {
+  description = "Name of the PowerShell script file"
+  type        = string
+  default     = "create-scheduled-task.ps1"
 }
