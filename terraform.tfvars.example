@@ -1,0 +1,13 @@
+# Example terraform.tfvars file
+resource_group_name                = "rg-vmss-demo"
+location                          = "East US"
+custom_image_name                 = "your-custom-image-name"
+custom_image_resource_group_name  = "your-custom-image-rg"
+vm_sku                           = "Standard_B2s"
+admin_username                   = "adminuser"
+admin_password                   = "YourSecurePassword123!"
+# Storage account details (created manually in Azure Portal)
+storage_account_name         = "yourstorageaccountname"
+storage_account_key          = "your-storage-account-access-key-here"
+storage_container_name       = "scripts"
+script_file_name            = "create-scheduled-task.ps1"
