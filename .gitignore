@@ -33,3 +33,10 @@ credentials.tf
 # IDE directories
 .idea/
 .vscode/
+
+
+# Ignore the terraform.tfvars file
+terraform.tfvars
+
+# Ignore the terraform lock file
+terraform.lock.hcl
